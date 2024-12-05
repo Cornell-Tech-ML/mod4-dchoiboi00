@@ -340,7 +340,9 @@ def tensor_reduce(
 
         if out_pos < out_size:
             cache[pos] = reduce_value  # start out
-            to_index(out_pos, out_shape, out_index)  # get out_index of out_pos (current block)
+            to_index(
+                out_pos, out_shape, out_index
+            )  # get out_index of out_pos (current block)
 
             # In every block (1024 threads), we overwrite out_index[reduce_dim] for each thread to get
             # all 1024 values from a_storage, then we reduce.

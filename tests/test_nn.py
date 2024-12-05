@@ -33,25 +33,21 @@ def test_avg(t: Tensor) -> None:
 def test_max(t: Tensor) -> None:
     # Max-reduce on first dimension -> 1x3x4
     out = minitorch.nn.max(t, 0)
-    assert_close(
-        out[0, 0, 0], max([t[i, 0, 0] for i in range(2)])
-    )
+    assert_close(out[0, 0, 0], max([t[i, 0, 0] for i in range(2)]))
     assert out.shape == (1, 3, 4)
     # Max-reduce on second dimension -> 2x1x4
     out = minitorch.nn.max(t, 1)
-    assert_close(
-        out[0, 0, 0], max([t[0, i, 0] for i in range(3)])
-    )
+    assert_close(out[0, 0, 0], max([t[0, i, 0] for i in range(3)]))
     assert out.shape == (2, 1, 4)
     # Max-reduce on third dimension -> 2x3x1
     out = minitorch.nn.max(t, 2)
-    assert_close(
-        out[0, 0, 0], max([t[0, 0, i] for i in range(4)])
-    )
+    assert_close(out[0, 0, 0], max([t[0, 0, i] for i in range(4)]))
     assert out.shape == (2, 3, 1)
 
     # Check gradient using grad_check (adds small noise to avoid non-differentiable points)
-    minitorch.grad_check(lambda t: minitorch.nn.max(t, 0), t + (minitorch.rand(t.shape) * 1e-4))
+    minitorch.grad_check(
+        lambda t: minitorch.nn.max(t, 0), t + (minitorch.rand(t.shape) * 1e-4)
+    )
 
     # Check gradient manually
     t.requires_grad_(True)
@@ -68,8 +64,6 @@ def test_max(t: Tensor) -> None:
                     assert_close(t.grad[i, j, k], 1.0)
                 else:
                     assert_close(t.grad[i, j, k], 0.0)
-
-
 
 
 @pytest.mark.task4_4
