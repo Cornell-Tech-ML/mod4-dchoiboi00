@@ -34,8 +34,7 @@ class Conv1d(minitorch.Module):
         self.bias = RParam(1, out_channels, 1)
 
     def forward(self, input):
-        # TODO: Implement for Task 4.5.
-        raise NotImplementedError("Need to implement for Task 4.5")
+        return minitorch.conv1d(input, self.weights.value) + self.bias.value
 
 
 class CNNSentimentKim(minitorch.Module):
@@ -61,16 +60,40 @@ class CNNSentimentKim(minitorch.Module):
     ):
         super().__init__()
         self.feature_map_size = feature_map_size
-        # TODO: Implement for Task 4.5.
-        raise NotImplementedError("Need to implement for Task 4.5")
+        self.conv1 = Conv1d(embedding_size, feature_map_size, filter_sizes[0])
+        self.conv2 = Conv1d(embedding_size, feature_map_size, filter_sizes[1])
+        self.conv3 = Conv1d(embedding_size, feature_map_size, filter_sizes[2])
+        self.fc = Linear(feature_map_size, 1)
+        self.dropout = dropout
 
     def forward(self, embeddings):
         """
         embeddings tensor: [batch x sentence length x embedding dim]
         """
-        # TODO: Implement for Task 4.5.
-        raise NotImplementedError("Need to implement for Task 4.5")
 
+
+        # embedding dim is in_channels, sentence length is width
+        # Match Conv1D input shape: [batch x embedding_dim x sentence_length]
+        embeddings = embeddings.permute(0, 2, 1)
+
+        # Apply Conv1D and ReLU (batch, feature_map_size, width)
+        # -> Apply max-over-time pooling (max along width)
+        x1 = minitorch.nn.max(self.conv1(embeddings).relu(), dim=2)
+        x2 = minitorch.nn.max(self.conv2(embeddings).relu(), dim=2)
+        x3 = minitorch.nn.max(self.conv3(embeddings).relu(), dim=2)
+
+        # Concatenate the max-pooled features
+        x = x1 + x2 + x3
+
+        # Apply Linear
+        batch = x.shape[0]
+        x = self.fc(x.view(batch, self.feature_map_size))
+
+        # Apply Dropout
+        x = minitorch.dropout(x, self.dropout, not self.training)
+
+        # Apply Sigmoid and reshape to batch size for binary classification
+        return x.sigmoid().view(batch)
 
 # Evaluation helper methods
 def get_predictions_array(y_true, model_output):
