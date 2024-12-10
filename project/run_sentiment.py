@@ -85,9 +85,9 @@ class CNNSentimentKim(minitorch.Module):
         # Concatenate the max-pooled features
         x = x1 + x2 + x3
 
-        # Apply Linear and ReLU
+        # Apply Linear
         batch = x.shape[0]
-        x = self.fc(x.view(batch, self.feature_map_size)).relu()
+        x = self.fc(x.view(batch, self.feature_map_size))
 
         # Apply Dropout
         x = minitorch.dropout(x, self.dropout, not self.training)
